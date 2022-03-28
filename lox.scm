@@ -13,7 +13,7 @@
   (display (token-literal token)))
 
 ;; Error-reporting
-(define had-error #f)
+(define *had-error* #f)
 (define (report line where message)
   (display "[line ")
   (display line)
@@ -21,7 +21,7 @@
   (display where)
   (display ": ")
   (display message)
-  (set! had-error #t))
+  (set! *had-error* #t))
 
 (define (error line message)
   (report line "" message))
@@ -43,7 +43,7 @@
   (let ((port (open-input-file f)))
     (run port)
     (close-port port)
-    (when had-error (exit 64))))
+    (when *had-error* (exit 64))))
 
 (define (main args)
   (case (length args)
