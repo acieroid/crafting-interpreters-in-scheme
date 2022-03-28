@@ -1,3 +1,17 @@
+(define had-error #f)
+
+(define (report line where message)
+  (display "[line ")
+  (display line)
+  (display "] Error ")
+  (display where)
+  (display ": ")
+  (display message)
+  (set! had-error #t))
+
+(define (error line message)
+  (report line "" message))
+
 (define (scan port)
   '("TODO"))
 
