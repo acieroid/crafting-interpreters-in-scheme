@@ -21,6 +21,7 @@
   (display where)
   (display ": ")
   (display message)
+  (newline)
   (set! *had-error* #t))
 
 (define (error line message)
