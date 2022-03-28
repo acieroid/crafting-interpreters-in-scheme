@@ -1,5 +1,4 @@
-(define had-error #f)
-
+;; Token
 (define (token type lexeme literal line)
   (list type lexeme literal line))
 (define token-type car)
@@ -13,6 +12,8 @@
   (display " ")
   (display (token-literal token)))
 
+;; Error-reporting
+(define had-error #f)
 (define (report line where message)
   (display "[line ")
   (display line)
