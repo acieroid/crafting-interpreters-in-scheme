@@ -32,7 +32,7 @@
   (define current 0)
   (define scanned '())
   (define (new-token1 type)
-    (let ((scanned-so-far (string (reverse scanned))))
+    (let ((scanned-so-far (list->string (reverse scanned))))
       (set! scanned '())
       (token type scanned-so-far #f line)))
   (define (match expected)
