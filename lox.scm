@@ -1,10 +1,14 @@
+(define (run port)
+  (display "running"))
+
 (define (run-prompt)
-  (display "running prompt")
+  (run  (current-input-port))
   (newline))
 
 (define (run-file f)
-  (display "running file")
-  (newline))
+  (let ((port (open-input-file f)))
+    (run port)
+    (close-port port)))
 
 (define (main args)
   (case (length args)
