@@ -44,6 +44,10 @@
             (read-char port)
             (set! scanned (cons c scanned))
             #t))))
+  (define (scan-comment)
+    ;; TODO
+    #f
+    )
   (define (scan-token)
     (let ((c (read-char port)))
       (set! scanned (cons c scanned))
@@ -62,11 +66,16 @@
         ((#\=) (new-token1 (if (match #\=) 'EQUAL_EQUAL 'EQUAL)))
         ((#\>) (new-token1 (if (match #\=) 'LESS_EQUAL 'LESS)))
         ((#\<) (new-token1 (if (match #\=) 'GREATER_EQUAL 'GREATER)))
+        ((#\\) (if (match #\\)
+                   (scan-comment)
+                   (new-token1 'SLASH)))
         (else (error line (string-append "Unknown token: " (string c)))))))
   (define (loop rev-tokens)
     (if (eof-object? (peek-char port))
         (reverse rev-tokens)
-        (loop (cons (scan-token) rev-tokens))))
+        (let* ((scanned (scan-token))
+               (new-rev-tokens (if scanned (cons scanned rev-tokens) rev-tokens)))
+          (loop new-rev-tokens))))
   (loop '()))
 
 (define (run port)
