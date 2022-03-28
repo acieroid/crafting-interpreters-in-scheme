@@ -45,9 +45,10 @@
             (set! scanned (cons c scanned))
             #t))))
   (define (scan-comment)
-    ;; TODO
-    #f
-    )
+    (let ((c (read-char port)))
+      (if (or (eof-object? c) (char=? c #\newline))
+          #f
+          (scan-comment))))
   (define (scan-token)
     (let ((c (read-char port)))
       (set! scanned (cons c scanned))
