@@ -22,13 +22,14 @@
               tokens)))
 
 (define (run-prompt)
-  (run  (current-input-port))
+  (run (current-input-port))
   (newline))
 
 (define (run-file f)
   (let ((port (open-input-file f)))
     (run port)
-    (close-port port)))
+    (close-port port)
+    (when had-error (exit 64))))
 
 (define (main args)
   (case (length args)
