@@ -1,5 +1,11 @@
+(define (scan port)
+  '("TODO"))
+
 (define (run port)
-  (display "running"))
+  (let ((tokens (scan port)))
+    (for-each (lambda (token)
+                (display token))
+              tokens)))
 
 (define (run-prompt)
   (run  (current-input-port))
