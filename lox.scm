@@ -110,7 +110,10 @@
         (display token-types)
         (newline))))
   (test-case "==" '(EQUAL_EQUAL))
-  (test-case "!" '(BANG)))
+  (test-case "!" '(BANG))
+  (test-case "// this is a comment" '())
+  (test-case "(( )){}" '(LEFT-PAREN LEFT-PAREN RIGHT-PAREN RIGHT-PAREN LEFT-BRACE RIGHT-BRACE))
+  (test-case "!*+-/=<> <= ==" '(BANG STAR PLUS MINUS SLASH EQUAL LESSER GREATER LESSER-EQUAL EQUAL-EQUAL)))
 
 (define (test)
   (test-scanner))
