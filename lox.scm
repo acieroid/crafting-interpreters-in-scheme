@@ -95,11 +95,32 @@
     (close-port port)
     (when *had-error* (exit 64))))
 
+(define (test-scanner)
+  (define (test-case input expected)
+    (let* ((port (open-input-string input))
+           (tokens (scan port))
+           (token-types (map token-type tokens)))
+      (close-port port)
+      (when (not (equal? token-types expected))
+        (display "test-scanner failed on input ")
+        (display input)
+        (display ": got ")
+        (display token-types)
+        (newline))))
+  (test-case "==" '(EQUAL_EQUAL))
+  (test-case "!" '(BANG)))
+
+(define (test)
+  (test-scanner))
+
 (define (main args)
   (case (length args)
     ((0) (run-prompt))
-    ((1) (run-file (car args)))
+    ((1) (if (string=? (car args) "--test")
+             (test)
+             (run-file (car args))))
     (else (begin (display "Usage: lox [script]")
                  (exit 64)))))
 
 (main (cdr (program-arguments)))
+
