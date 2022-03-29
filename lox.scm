@@ -130,7 +130,8 @@
   (test-case "// this is a comment" '())
   (test-case "(( )){}" '(LEFT-PAREN LEFT-PAREN RIGHT-PAREN RIGHT-PAREN LEFT-BRACE RIGHT-BRACE))
   (test-case "!*+-/=<> <= ==" '(BANG STAR PLUS MINUS SLASH EQUAL LESS GREATER LESS-EQUAL EQUAL-EQUAL))
-  (test-case "\"hello\" \"world\"" '(STRING STRING)))
+  (test-case "\"hello\" \"world\"" '(STRING STRING))
+  (test-case "\"hello\n\"" '(STRING)))
 
 (define (test)
   (test-scanner))
