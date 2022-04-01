@@ -24,9 +24,10 @@
   (newline)
   (set! *had-error* #t))
 
-(define (error line message)
+(define (scanner-error line message)
   (report line "" message))
 
+;; Scanner
 (define (scan port)
   (define line 1)
   (define current 0)
@@ -55,7 +56,7 @@
     (let ((c (peek-char port)))
       (if (eof-object? c)
           (begin
-            (error line "Unterminated string")
+            (scanner-error line "Unterminated string")
             #f)
           (begin
             (when (char=? c #\newline) (set! line (+ line 1)))
@@ -73,7 +74,7 @@
             (scan-number seen-dot))
           (if (and (not (eof-object? (peek-char port)))
                    (not seen-dot)
-                   (char=? #\.))
+                   (char=? c #\.))
               (begin
                 (read-char port)
                 (if (char-numeric? (peek-char port))
@@ -126,7 +127,7 @@
              (scan-number #f)
              (if (char-alphabetic? c)
                  (scan-identifier)
-                 (error line (string-append "Unknown token: " (string c)))))))))
+                 (scanner-error line (string-append "Unknown token: " (string c)))))))))
   (define (loop rev-tokens)
     (if (eof-object? (peek-char port))
         (reverse rev-tokens)
@@ -178,7 +179,9 @@
   (test-case "123" '(NUMBER))
   (test-case "1.23 43.5 6" '(NUMBER NUMBER NUMBER))
   (test-case "if this return super" '(IF THIS RETURN SUPER))
-  (test-case "hello world" '(IDENTIFIER IDENTIFIER)))
+  (test-case "hello world" '(IDENTIFIER IDENTIFIER))
+  (test-case "1+2" '(NUMBER PLUS NUMBER))
+  (test-case "1+2=3" '(NUMBER PLUS NUMBER EQUAL NUMBER)))
 
 (define (test)
   (test-scanner))
