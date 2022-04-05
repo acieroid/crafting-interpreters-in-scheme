@@ -232,7 +232,22 @@
       (case operator
         ((MINUS) (- right))
         ((BANG) (not (is-truthy right))))))
-
+   ((BINARY)
+    (let ((operator (cadr expr))
+          (left (evaluate (caddr expr)))
+          (right (evaluate (cadddr expr))))
+      (case (car operator)
+        ((MINUS) (- left right))
+        ((SLASH) (/ left right))
+        ((STAR) (* left right))
+        ((PLUS) 1
+         (if (and (number? left) (number? right))
+             (+ left right)
+             (if (and (string? left) (string? right))
+                 (string-append left right)
+                 #f)))
+        ((GREATER) (> left right))
+        ((GREATER-EQUAL) (>= left right)))))
    ))
 
 ;; Interface
