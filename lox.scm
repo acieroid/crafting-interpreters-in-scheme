@@ -230,8 +230,8 @@
     (let ((operator (cadr expr))
           (right (evaluate (caddr expr))))
       (case operator
-        ((-) (- right))
-        ((!) (not (is-truthy right))))))
+        ((MINUS) (- right))
+        ((BANG) (not (is-truthy right))))))
 
    ))
 
