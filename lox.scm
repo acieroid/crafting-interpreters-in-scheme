@@ -224,11 +224,11 @@
   (define (is-truthy v)
     (if (boolean? v) v #t))
   (define (is-equal a b)
-    (equals a b))
+    (equal a b))
   (define (check-number-operand operator operand)
     (if (number? operand)
         #t
-        (error "Operand must be a number")))
+        (error (string-append "Operand must be a number for: " (symbol->string operator)))))
   (case (car expr)
    ((LITERAL) (cadr expr))
    ((GROUPING) (evaluate (cadr expr)))
