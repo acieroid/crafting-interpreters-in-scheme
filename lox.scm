@@ -167,7 +167,7 @@
     (cond
      ((match '(FALSE)) (list 'LITERAL #f))
      ((match '(TRUE)) (list 'LITERAL #t))
-     ((match '(NIL)) (list 'LITERAL null))
+     ((match '(NIL)) (list 'LITERAL 'null))
      ((match '(NUMBER STRING)) (list 'LITERAL (token-literal previous)))
      ((match '(LEFT-PAREN))
       (let ((expr (expression)))
@@ -212,7 +212,7 @@
       (if (match '(BANG-EQUAL EQUAL-EQUAL))
           (let* ((operator previous)
                  (right (comparison))
-                 (expr (list 'BINARY expr operator left)))
+                 (expr (list 'BINARY expr operator right)))
             (loop expr))
           expr))
     (loop (comparison)))
