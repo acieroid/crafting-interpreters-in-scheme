@@ -219,6 +219,22 @@
   (define (expression) (equality))
   (expression))
 
+;; Evaluation
+(define (evaluate expr)
+  (define (is-truthy v)
+    (if (boolean? v) v #t))
+  (case (car expr)
+   ((LITERAL) (cadr expr))
+   ((GROUPING) (evaluate (cadr expr)))
+   ((UNARY)
+    (let ((operator (cadr expr))
+          (right (evaluate (caddr expr))))
+      (case operator
+        ((-) (- right))
+        ((!) (not (is-truthy right))))))
+
+   ))
+
 ;; Interface
 (define (run port)
   (let* ((tokens (scan port))
