@@ -224,7 +224,7 @@
   (define (is-truthy v)
     (if (boolean? v) v #t))
   (define (is-equal a b)
-    (equal a b))
+    (equal? a b))
   (define (check-number-operand operator operand)
     (if (number? operand)
         #t
