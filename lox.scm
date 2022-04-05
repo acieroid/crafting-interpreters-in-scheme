@@ -223,6 +223,8 @@
 (define (evaluate expr)
   (define (is-truthy v)
     (if (boolean? v) v #t))
+  (define (is-equal a b)
+    (equals a b))
   (case (car expr)
    ((LITERAL) (cadr expr))
    ((GROUPING) (evaluate (cadr expr)))
@@ -247,7 +249,11 @@
                  (string-append left right)
                  #f)))
         ((GREATER) (> left right))
-        ((GREATER-EQUAL) (>= left right)))))
+        ((GREATER-EQUAL) (>= left right))
+        ((LESS) (< left right))
+        ((LESS-EQUAL) (<= left right))
+        ((BANG-EQUAL) (not (is-equal left right)))
+        ((EQUAL-EQUAL) (is-equal left right)))))
    ))
 
 ;; Interface
