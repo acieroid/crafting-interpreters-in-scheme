@@ -225,6 +225,10 @@
     (if (boolean? v) v #t))
   (define (is-equal a b)
     (equals a b))
+  (define (check-number-operand operator operand)
+    (if (number? operand)
+        #t
+        (error "Operand must be a number")))
   (case (car expr)
    ((LITERAL) (cadr expr))
    ((GROUPING) (evaluate (cadr expr)))
@@ -232,7 +236,9 @@
     (let ((operator (cadr expr))
           (right (evaluate (caddr expr))))
       (case operator
-        ((MINUS) (- right))
+        ((MINUS)
+         (check-number-operand right)
+         (- right))
         ((BANG) (not (is-truthy right))))))
    ((BINARY)
     (let ((operator (cadr expr))
