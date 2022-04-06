@@ -350,8 +350,8 @@
         (display " instead of ")
         (display expected)
         (newline))))
-  (test-case "1+2;" '(BINARY (LITERAL 1) (PLUS "+" #f 1) (LITERAL 2)))
-  (test-case "1*(2+3);" '(BINARY (LITERAL 1) (STAR "*" #f 1) (GROUPING (BINARY (LITERAL 2) (PLUS "+" #f 1) (LITERAL 3))))))
+  (test-case "1+2;" '((EXPRESSION (BINARY (LITERAL 1) (PLUS "+" #f 1) (LITERAL 2)))))
+  (test-case "1*(2+3);" '((EXPRESSION (BINARY (LITERAL 1) (STAR "*" #f 1) (GROUPING (BINARY (LITERAL 2) (PLUS "+" #f 1) (LITERAL 3))))))))
 
 (define (test-evaluate)
   (define (test-case input expected)
