@@ -33,9 +33,9 @@
 (define (environment-define env name value)
   (cons (cons name value) env))
 (define (environment-get env name)
-  (let ((binding (assoc env name)))
+  (let ((binding (assoc name env)))
     (if binding
-        (cdr (assoc env name))
+        (cdr binding)
         (error (string-append "Undefined variable: " name)))))
 
 ;; Scanner
