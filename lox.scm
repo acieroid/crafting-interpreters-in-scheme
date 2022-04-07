@@ -27,6 +27,17 @@
 (define (scanner-error line message)
   (report line "" message))
 
+;; Environments
+(define (new-environment)
+  '())
+(define (environment-define env name value)
+  (cons (cons name value) env))
+(define (environment-get env name)
+  (let ((binding (assoc env name)))
+    (if binding
+        (cdr (assoc env name))
+        (error (string-append "Undefined variable: " name)))))
+
 ;; Scanner
 (define (scan port)
   (define line 1)
