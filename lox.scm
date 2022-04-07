@@ -174,6 +174,8 @@
       (let ((expr (expression)))
         (consume 'RIGHT-PAREN "Expect ')' after expression.")
         (list 'GROUPING expr)))
+     ((match '(IDENTIFIER))
+      (list 'VARIABLE previous))
      (else (error "Expect expression."))))
   (define (unary)
     (if (match '(BANG MINUS))
@@ -374,7 +376,8 @@
         (newline))))
   (test-case "1+2;" '((EXPRESSION (BINARY (LITERAL 1) (PLUS "+" #f 1) (LITERAL 2)))))
   (test-case "1*(2+3);" '((EXPRESSION (BINARY (LITERAL 1) (STAR "*" #f 1) (GROUPING (BINARY (LITERAL 2) (PLUS "+" #f 1) (LITERAL 3)))))))
-  (test-case "var x = 5;" '((VAR (IDENTIFIER "x" #f 1) (LITERAL 5)))))
+  (test-case "var x = 5;" '((VAR (IDENTIFIER "x" #f 1) (LITERAL 5))))
+  (test-case "x;" '((EXPRESSION (VARIABLE (IDENTIFIER "x" #f 1))))))
 
 (define (test-evaluate)
   (define (test-case input expected)
