@@ -38,7 +38,7 @@
     (if binding
         (set-cdr! binding value)
         (if (car env)
-            (environment-assign! (car env) name)
+            (environment-assign! (car env) name value)
             (error (string-append "Undefined variable: " name))))))
 (define (environment-get env name)
   (let ((binding (assoc name (cdr env))))
