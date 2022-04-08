@@ -37,7 +37,9 @@
   (let ((binding (assoc name (cdr env))))
     (if binding
         (cdr binding)
-        (error (string-append "Undefined variable: " name)))))
+        (if (car env)
+            (environment-get (car env) name)
+            (error (string-append "Undefined variable: " name))))))
 
 ;; Scanner
 (define (scan port)
@@ -261,7 +263,7 @@
 
 ;; Evaluation
 (define (evaluate program)
-  (define environment (new-environment 'TODO))
+  (define environment (new-environment #f))
   (define (is-truthy v)
     (if (boolean? v) v #t))
   (define (is-equal a b)
