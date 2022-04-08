@@ -28,12 +28,13 @@
   (report line "" message))
 
 ;; Environments
-(define (new-environment)
-  '())
-(define (environment-define env name value)
-  (cons (cons name value) env))
+(define (new-environment enclosing)
+  (cons enclosing '()))
+(define (environment-define! env name value)
+  (set-cdr! env
+            (cons (cons name value) (cdr env))))
 (define (environment-get env name)
-  (let ((binding (assoc name env)))
+  (let ((binding (assoc name (cdr env))))
     (if binding
         (cdr binding)
         (error (string-append "Undefined variable: " name)))))
@@ -260,7 +261,7 @@
 
 ;; Evaluation
 (define (evaluate program)
-  (define environment (new-environment))
+  (define environment (new-environment 'TODO))
   (define (is-truthy v)
     (if (boolean? v) v #t))
   (define (is-equal a b)
@@ -325,7 +326,7 @@
       'null))
   (define (evaluate-var name initializer)
     (let ((value (if initializer (evaluate-expr initializer) 'null)))
-      (set! environment (environment-define environment name value))
+      (environment-define! environment name value)
       'null))
   (define (evaluate-program statements)
     (map (lambda (statement)
