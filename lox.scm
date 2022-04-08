@@ -33,6 +33,9 @@
 (define (environment-define! env name value)
   (set-cdr! env
             (cons (cons name value) (cdr env))))
+(define (environment-assign! env name value)
+  (let ((binding (assoc name (cdr env))))
+    (set-cdr! binding value)))
 (define (environment-get env name)
   (let ((binding (assoc name (cdr env))))
     (if binding
@@ -331,6 +334,11 @@
       ((VARIABLE)
        (let ((name (cadr expr)))
          (environment-get environment name)))
+      ((ASSIGNMENT)
+       (let ((name (cadr expr))
+             (value (evaluate-expr (caddr expr))))
+         (environment-assign! environment name value)
+         value))
       (else (error "Unknown expression: " (symbol->string (car expr))))))
   (define (evaluate-print expr)
     (let ((value (evaluate-expr expr)))
@@ -430,7 +438,8 @@
         (newline))))
   (test-case "1+2;" '(3))
   (test-case "print true; print 2 + 1;" '(null null))
-  (test-case "var x = 5; x+1;" '(null 6)))
+  (test-case "var x = 5; x+1;" '(null 6))
+  (test-case "var x = 5; x = 3; x;" '(null 3 3)))
 
 (define (test)
   (test-scanner)
