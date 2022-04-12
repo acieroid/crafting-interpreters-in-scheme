@@ -265,8 +265,16 @@
         (begin
           (consume 'RIGHT-BRACE "Expect '}' after block.")
           (reverse rev-statements))))
+  (define (if-statement)
+    (consume 'LEFT-PAREN "Expect '(' after 'if'.")
+    (let ((condition (expression)))
+      (consume 'RIGHT-PAREN "Expect ')' after if condition.")
+      (let ((then (statement))
+            (else (if (match '(ELSE)) (statement) #f)))
+        (list 'IF condition then else))))
   (define (statement)
     (cond
+     ((match '(IF)) (if-statement))
      ((match '(PRINT)) (print-statement))
      ((match '(LEFT-BRACE)) (list 'BLOCK (block '())))
      (else  (expression-statement))))
@@ -439,7 +447,8 @@
   (test-case "x;" '((EXPRESSION (VARIABLE (IDENTIFIER "x" #f 1)))))
   (test-case "x = 3;" '((EXPRESSION (ASSIGNMENT (IDENTIFIER "x" #f 1) (LITERAL 3)))))
   (test-case "{ var x; 1; }" '((BLOCK ((VAR (IDENTIFIER "x" #f 1) null) (EXPRESSION (LITERAL 1))))))
-  (test-case "var x = 5; { var x = 3; x; } x;" ' ((VAR (IDENTIFIER "x" #f 1) (LITERAL 5)) (BLOCK ((VAR (IDENTIFIER "x" #f 1) (LITERAL 3)) (EXPRESSION (VARIABLE (IDENTIFIER "x" #f 1))))) (EXPRESSION (VARIABLE (IDENTIFIER "x" #f 1))))))
+  (test-case "var x = 5; { var x = 3; x; } x;" ' ((VAR (IDENTIFIER "x" #f 1) (LITERAL 5)) (BLOCK ((VAR (IDENTIFIER "x" #f 1) (LITERAL 3)) (EXPRESSION (VARIABLE (IDENTIFIER "x" #f 1))))) (EXPRESSION (VARIABLE (IDENTIFIER "x" #f 1)))))
+  (test-case "if (5) { x; } else { y; }" '((IF (LITERAL 5) (BLOCK ((EXPRESSION (VARIABLE (IDENTIFIER "x" #f 1))))) (BLOCK ((EXPRESSION (VARIABLE (IDENTIFIER "y" #f 1)))))))))
 
 (define (test-evaluate)
   (define (test-case input expected)
