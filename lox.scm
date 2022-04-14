@@ -409,6 +409,10 @@
         (if then
             (evaluate-program (list else))
             'null)))
+  (define (evaluate-while cond body)
+    (if (is-truthy (evaluate-expr cond))
+        (evaluate-program (list body))
+        'null))
   (define (evaluate-program statements)
     (map (lambda (statement)
            (case (car statement)
@@ -416,7 +420,8 @@
              ((PRINT) (evaluate-print (cadr statement)))
              ((VAR) (evaluate-var (cadr statement) (caddr statement)))
              ((BLOCK) (evaluate-block (cadr statement) environment))
-             ((IF) (evaluate-if (cadr statement) (caddr statement) (cadddr statement)))))
+             ((IF) (evaluate-if (cadr statement) (caddr statement) (cadddr statement)))
+             ((WHILE) (evaluate-while (cadr statement) (caddr statement)))))
          statements))
   (evaluate-program program))
 
@@ -510,7 +515,9 @@
   (test-case "var x = 5; x = 3; x;" '(null 3 3))
   (test-case "var x = 5; { var x = 3; x; } x;" '(null (null 3) 5))
   (test-case "var x = 5; if (x) { x = 3; } else { x = 2; } x;" '(null ((3)) 3))
-  (test-case "true and false or true;" '(#t)))
+  (test-case "true and false or true;" '(#t))
+  (test-case "var x = 5; while (x > 0) { x = x - 1; } x;" '(null (null) 0))
+  )
 
 (define (test)
   (test-scanner)
