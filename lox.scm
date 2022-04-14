@@ -411,7 +411,9 @@
             'null)))
   (define (evaluate-while cond body)
     (if (is-truthy (evaluate-expr cond))
-        (evaluate-program (list body))
+        (begin
+          (evaluate-program (list body))
+          (evaluate-while cond body))
         'null))
   (define (evaluate-program statements)
     (map (lambda (statement)
@@ -516,7 +518,7 @@
   (test-case "var x = 5; { var x = 3; x; } x;" '(null (null 3) 5))
   (test-case "var x = 5; if (x) { x = 3; } else { x = 2; } x;" '(null ((3)) 3))
   (test-case "true and false or true;" '(#t))
-  (test-case "var x = 5; while (x > 0) { x = x - 1; } x;" '(null (null) 0))
+  (test-case "var x = 5; while (x > 0) { x = x - 1; } x;" '(null null 0))
   )
 
 (define (test)
