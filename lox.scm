@@ -294,8 +294,30 @@
       (consume 'RIGHT-PAREN "Expect ')' after condition.")
       (let ((body (statement)))
         (list 'WHILE condition body))))
+  (define (for-statement)
+    (consume 'LEFT-PAREN "Expect '(' after 'for'.")
+    (let ((initializer (cond
+                        ((match '(SEMICOLON)) #f)
+                        ((match '(VAR)) (var-declaration))
+                        (else (expression-statement))))
+          (condition (if (not (check 'SEMICOLON))
+                         (expression)
+                         (list 'LITERAL #t))))
+      (consume 'SEMICOLON "Expect ';' after loop condition.")
+      (let ((increment (if (not (check 'RIGHT-PAREN))
+                            (expression)
+                            #f)))
+        (consume 'RIGHT-PAREN "Expect ')' after for clauses.")
+        (let ((body (statement)))
+          (if increment
+              (set! body (list 'BLOCK (list body (list 'EXPRESSION increment)))))
+          (set! body (list 'WHILE condition body))
+          (if initializer
+              (set! body (list 'BLOCK (list initializer body))))
+          body))))
   (define (statement)
     (cond
+     ((match '(FOR)) (for-statement))
      ((match '(IF)) (if-statement))
      ((match '(PRINT)) (print-statement))
      ((match '(LEFT-BRACE)) (list 'BLOCK (block '())))
@@ -494,7 +516,8 @@
   (test-case "var x = 5; { var x = 3; x; } x;" ' ((VAR (IDENTIFIER "x" #f 1) (LITERAL 5)) (BLOCK ((VAR (IDENTIFIER "x" #f 1) (LITERAL 3)) (EXPRESSION (VARIABLE (IDENTIFIER "x" #f 1))))) (EXPRESSION (VARIABLE (IDENTIFIER "x" #f 1)))))
   (test-case "if (5) { x; } else { y; }" '((IF (LITERAL 5) (BLOCK ((EXPRESSION (VARIABLE (IDENTIFIER "x" #f 1))))) (BLOCK ((EXPRESSION (VARIABLE (IDENTIFIER "y" #f 1))))))))
   (test-case "true or false and true;" '((EXPRESSION (LOGICAL (LITERAL #t) (OR "or" #f 1) (LOGICAL (LITERAL #f) (AND "and" #f 1) (LITERAL #t))))))
-  (test-case "while (true) { 1; }" '((WHILE (LITERAL #t) (BLOCK ((EXPRESSION (LITERAL 1))))))))
+  (test-case "while (true) { 1; }" '((WHILE (LITERAL #t) (BLOCK ((EXPRESSION (LITERAL 1)))))))
+  (test-case "for (var x = 1; x < 10; x = x + 1) { print x; }" '((BLOCK ((VAR (IDENTIFIER "x" #f 1) (LITERAL 1)) (WHILE (BINARY (VARIABLE (IDENTIFIER "x" #f 1)) (LESS "<" #f 1) (LITERAL 10)) (BLOCK ((BLOCK ((PRINT (VARIABLE (IDENTIFIER "x" #f 1))))) (EXPRESSION (ASSIGNMENT (IDENTIFIER "x" #f 1) (BINARY (VARIABLE (IDENTIFIER "x" #f 1)) (PLUS "+" #f 1) (LITERAL 1)))))))))) ))
 
 (define (test-evaluate)
   (define (test-case input expected)
@@ -537,4 +560,3 @@
                  (exit 64)))))
 
 (main (cdr (program-arguments)))
-
