@@ -41,7 +41,9 @@
             (environment-assign! (car env) name value)
             (error (string-append "Undefined variable: " name))))))
 (define (environment-get env name)
+  (display "get: ") (display name) (display " -- ") (display env) (newline)
   (let ((binding (assoc name (cdr env))))
+    (display "binding: ") (display binding) (newline)
     (if binding
         (cdr binding)
         (if (car env)
@@ -49,7 +51,7 @@
             (error (string-append "Undefined variable: " name))))))
 
 ;; Callables
-(define (make-native-callable f arity)
+(define (make-native f arity)
   (list 'NATIVE arity f))
 (define (callable-arity callable)
   (cadr callable))
@@ -370,8 +372,13 @@
   (program '()))
 
 ;; Evaluation
+(define (global-environment)
+  (define env (new-environment #f))
+  (environment-define! env "clock" (make-native 0 (lambda () (current-time))))
+  env)
+
 (define (evaluate program)
-  (define environment (new-environment #f))
+  (define environment (global-environment))
   (define (is-truthy v)
     (if (boolean? v) v #t))
   (define (is-equal a b)
@@ -441,6 +448,7 @@
          (case (car operator)
            ((OR) (if (is-truthy left) left (evaluate-expr right)))
            ((AND) (if (not (is-truthy left)) left (evaluate-expr right))))))
+      ((CALL) (evaluate-call (cadr expr) (cadddr expr)))
       (else (error "Unknown expression: " (symbol->string (car expr))))))
   (define (evaluate-print expr)
     (let ((value (evaluate-expr expr)))
@@ -469,6 +477,7 @@
           (evaluate-while cond body))
         'null))
   (define (evaluate-call callee arguments)
+    (display callee) (newline)
     (let ((f (evaluate-expr callee))
           (args (map evaluate-expr arguments)))
       (if (callable? f)
@@ -482,18 +491,16 @@
              ((VAR) (evaluate-var (cadr statement) (caddr statement)))
              ((BLOCK) (evaluate-block (cadr statement) environment))
              ((IF) (evaluate-if (cadr statement) (caddr statement) (cadddr statement)))
-             ((WHILE) (evaluate-while (cadr statement) (caddr statement)))
-             ((CALL) (evaluate-call (cadr statement) (cadddr statement)))))
+             ((WHILE) (evaluate-while (cadr statement) (caddr statement)))))
          statements))
   (evaluate-program program))
 
 ;; Interface
 (define (run port)
   (let* ((tokens (scan port))
-         (expression (parse tokens)))
-    (for-each (lambda (exp-element)
-                (display exp-element))
-              expression)))
+         (program (parse tokens))
+         (value (evaluate program)))
+    (display value)))
 
 (define (run-prompt)
   (run (current-input-port))
