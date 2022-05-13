@@ -203,7 +203,7 @@
   (define (consume type message)
     (if (check type)
         (advance)
-        (error message)))
+        (error message (car tokens))))
   (define (primary)
     (cond
      ((match '(FALSE)) (list 'LITERAL #f))
@@ -363,8 +363,25 @@
           (initializer (if (match '(EQUAL)) (expression) 'null)))
       (consume 'SEMICOLON "Expect ';' after variable declaration.")
       (list 'VAR name initializer)))
+  (define (function kind)
+    (define (parameter-loop rev-params)
+      (when (>= (length rev-params) 255)
+        (error "Can't have more than 255 parameters."))
+      (let ((param (consume 'IDENTIFIER "Expect parameter name.")))
+        (if (match '(COMMA))
+            (parameter-loop (cons param rev-params))
+            (begin
+              (consume 'RIGHT-PAREN "Expect ')' after parameters.")
+              (reverse (cons param rev-params))))))
+    (let ((name (consume 'IDENTIFIER (string-append "Expect " kind " name."))))
+      (consume 'LEFT-PAREN (string-append "Expect '(') after " kind "name."))
+      (let ((parameters (parameter-loop '())))
+        (consume 'LEFT-BRACE (string-append "Expect '{' before " kind " body."))
+        (let ((body (block '())))
+          (list 'FUNCTION name parameters body)))))
   (define (declaration)
     (cond
+     ((match '(FUN)) (function "function"))
      ((match '(VAR)) (var-declaration))
      (else (statement))))
   (define (program rev-statements)
@@ -569,6 +586,7 @@
   (test-case "f(1);" '((EXPRESSION (CALL (VARIABLE (IDENTIFIER "f" #f 1)) (RIGHT-PAREN ")" #f 1) ((LITERAL 1))))))
   (test-case "f();"  '((EXPRESSION (CALL (VARIABLE (IDENTIFIER "f" #f 1)) (RIGHT-PAREN ")" #f 1) ()))))
   (test-case "f()();"  '((EXPRESSION (CALL (CALL (VARIABLE (IDENTIFIER "f" #f 1)) (RIGHT-PAREN ")" #f 1) ()) (RIGHT-PAREN ")" #f 1) ()))))
+  (test-case "fun f(x, y) { x + y; }" '((FUNCTION (IDENTIFIER "f" #f 1) ((IDENTIFIER "x" #f 1) (IDENTIFIER "y" #f 1)) ((EXPRESSION (BINARY (VARIABLE (IDENTIFIER "x" #f 1)) (PLUS "+" #f 1) (VARIABLE (IDENTIFIER "y" #f 1))))))))
   )
 
 
