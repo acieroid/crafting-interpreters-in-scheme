@@ -81,7 +81,7 @@
     ((FUNCTION)
      (let ((environment (new-environment global-environment)))
        (bind-parameters environment (caddr (cadr callable)) arguments)
-       (evaluate (list 'BLOCK (cadddr (cadr callable))))))
+       (evaluate (list (list 'BLOCK (cadddr (cadr callable)))) environment)))
     (else (error "Unknown callable type"))))
 
 ;; Scanner
@@ -408,8 +408,7 @@
   (program '()))
 
 ;; Evaluation
-(define (evaluate program)
-  (define environment global-environment)
+(define (evaluate program environment)
   (define (is-truthy v)
     (if (boolean? v) v #t))
   (define (is-equal a b)
@@ -534,7 +533,7 @@
 (define (run port)
   (let* ((tokens (scan port))
          (program (parse tokens))
-         (value (evaluate program)))
+         (value (evaluate program global-environment)))
     (display value)))
 
 (define (run-prompt)
@@ -610,7 +609,7 @@
     (let* ((port (open-input-string input))
            (tokens (scan port))
            (expr (parse tokens))
-           (value (evaluate expr)))
+           (value (evaluate expr global-environment)))
       (close-port port)
       (when (not (equal? value expected))
         (display "test-evaluate failed on input ")
@@ -630,6 +629,7 @@
   (test-case "var x = 5; while (x > 0) { x = x - 1; } x;" '(null null 0))
   (test-case "identity(42);" '(42))
   (test-case "fun f(x, y) { x + y; }" '(null))
+  (test-case "fun sayHi(first, last) { print \"Hi, \" + first + \" \" + last + \"!\"; } sayHi(\"Dear\", \"Reader\");" '(null ((null))))
   )
 
 (define (test)
