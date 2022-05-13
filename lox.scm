@@ -1,3 +1,6 @@
+(define (debug str)
+  (display str)
+  (newline))
 ;; Token
 (define (token type lexeme literal line)
   (list type lexeme literal line))
@@ -41,9 +44,7 @@
             (environment-assign! (car env) name value)
             (error (string-append "Undefined variable: " name))))))
 (define (environment-get env name)
-  (display "get: ") (display name) (display " -- ") (display env) (newline)
   (let ((binding (assoc name (cdr env))))
-    (display "binding: ") (display binding) (newline)
     (if binding
         (cdr binding)
         (if (car env)
@@ -51,7 +52,7 @@
             (error (string-append "Undefined variable: " name))))))
 
 ;; Callables
-(define (make-native f arity)
+(define (make-native arity f)
   (list 'NATIVE arity f))
 (define (callable-arity callable)
   (cadr callable))
@@ -62,8 +63,9 @@
        (eq? (car callable) 'NATIVE)))
 (define (callable-call callable arguments)
   (case (car callable)
-    ((NATIVE) ((caddr callable) arguments)))
-  )
+    ((NATIVE)
+     ((caddr callable) arguments))
+    (else (error "Unknown callable type"))))
 
 ;; Scanner
 (define (scan port)
@@ -374,7 +376,8 @@
 ;; Evaluation
 (define (global-environment)
   (define env (new-environment #f))
-  (environment-define! env "clock" (make-native 0 (lambda () (current-time))))
+  (environment-define! env "clock" (make-native 0 (lambda (args) (current-time))))
+  (environment-define! env "identity" (make-native 0 (lambda (args) (car args))))
   env)
 
 (define (evaluate program)
@@ -435,10 +438,11 @@
            ((EQUAL-EQUAL) (is-equal left right)))))
       ((VARIABLE)
        (let ((name (cadr expr)))
-         (environment-get environment name)))
+         (environment-get environment (cadr name))))
       ((ASSIGNMENT)
-       (let ((name (cadr expr))
-             (value (evaluate-expr (caddr expr))))
+       (let* ((identifier (cadr expr))
+              (name (cadr identifier))
+              (value (evaluate-expr (caddr expr))))
          (environment-assign! environment name value)
          value))
       ((LOGICAL)
@@ -456,7 +460,7 @@
       'null))
   (define (evaluate-var name initializer)
     (let ((value (if initializer (evaluate-expr initializer) 'null)))
-      (environment-define! environment name value)
+      (environment-define! environment (cadr name) value)
       'null))
   (define (evaluate-block statements env)
     (let ((previous-env environment))
@@ -477,11 +481,10 @@
           (evaluate-while cond body))
         'null))
   (define (evaluate-call callee arguments)
-    (display callee) (newline)
     (let ((f (evaluate-expr callee))
           (args (map evaluate-expr arguments)))
       (if (callable? f)
-          (callable-call callee arguments)
+          (callable-call f args)
           (error "Can only call functions and classes"))))
   (define (evaluate-program statements)
     (map (lambda (statement)
@@ -592,6 +595,7 @@
   (test-case "var x = 5; if (x) { x = 3; } else { x = 2; } x;" '(null ((3)) 3))
   (test-case "true and false or true;" '(#t))
   (test-case "var x = 5; while (x > 0) { x = x - 1; } x;" '(null null 0))
+  (test-case "identity(42);" '(42))
   )
 
 (define (test)
