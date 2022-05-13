@@ -537,6 +537,8 @@
   (define (evaluate-function statement)
     (environment-define! environment (cadr (cadr statement)) (make-function statement))
     'null)
+  (define (evaluate-return expr)
+    (return (if expr (evaluate-expr expr) 'null)))
   (define (evaluate-program statements)
     (define (evaluate1 statement)
       (case (car statement)
@@ -547,7 +549,8 @@
         ((IF) (evaluate-if (cadr statement) (caddr statement) (cadddr statement)))
         ((WHILE) (evaluate-while (cadr statement) (caddr statement)))
         ((FUNCTION) (value (evaluate-function statement)))
-        (else (error "Unknown statement"))))
+        ((RETURN) (evaluate-return (caddr statement)))
+        (else (error "Unknown statement" statement))))
     (define (loop statements v)
       (if (null? statements)
           v
@@ -660,6 +663,7 @@
   (test-case "identity(42);" 42)
   (test-case "fun f(x, y) { x + y; }" 'null)
   (test-case "fun sayHi(first, last) { print \"Hi, \" + first + \" \" + last + \"!\"; } sayHi(\"Dear\", \"Reader\");" 'null)
+  (test-case "fun f(x, y) { return x + y; } f(1,2);" 3)
   )
 
 (define (test)
