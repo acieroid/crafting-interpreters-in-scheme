@@ -514,6 +514,9 @@
       (if (callable? f)
           (callable-call f args)
           (error "Can only call functions and classes"))))
+  (define (evaluate-function statement)
+    (environment-define! environment (cadr (cadr statement)) (make-function statement))
+    'null)
   (define (evaluate-program statements)
     (map (lambda (statement)
            (case (car statement)
@@ -522,7 +525,8 @@
              ((VAR) (evaluate-var (cadr statement) (caddr statement)))
              ((BLOCK) (evaluate-block (cadr statement) environment))
              ((IF) (evaluate-if (cadr statement) (caddr statement) (cadddr statement)))
-             ((WHILE) (evaluate-while (cadr statement) (caddr statement)))))
+             ((WHILE) (evaluate-while (cadr statement) (caddr statement)))
+             ((FUNCTION) (evaluate-function statement))))
          statements))
   (evaluate-program program))
 
@@ -625,6 +629,7 @@
   (test-case "true and false or true;" '(#t))
   (test-case "var x = 5; while (x > 0) { x = x - 1; } x;" '(null null 0))
   (test-case "identity(42);" '(42))
+  (test-case "fun f(x, y) { x + y; }" '(null))
   )
 
 (define (test)
