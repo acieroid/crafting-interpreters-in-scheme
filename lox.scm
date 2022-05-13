@@ -518,9 +518,9 @@
   (define (evaluate-if cond then else)
     (if (is-truthy (evaluate-expr cond))
         (evaluate-program (list then))
-        (if then
+        (if else
             (evaluate-program (list else))
-            'null)))
+            (value 'null))))
   (define (evaluate-while cond body)
     (if (is-truthy (evaluate-expr cond))
         (let ((result (evaluate-program (list body))))
@@ -664,6 +664,7 @@
   (test-case "fun f(x, y) { x + y; }" 'null)
   (test-case "fun sayHi(first, last) { print \"Hi, \" + first + \" \" + last + \"!\"; } sayHi(\"Dear\", \"Reader\");" 'null)
   (test-case "fun f(x, y) { return x + y; } f(1,2);" 3)
+ (test-case "fun fib(n) { if (n <= 1) return n; return fib(n - 2) + fib(n - 1); } for (var i = 0; i < 20; i = i + 1) { print fib(i); }" 'null)
   )
 
 (define (test)
