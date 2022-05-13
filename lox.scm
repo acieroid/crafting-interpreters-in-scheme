@@ -367,11 +367,19 @@
           (if initializer
               (set! body (list 'BLOCK (list initializer body))))
           body))))
+  (define (return-statement)
+    (let ((keyword previous)
+          (value (if (not (check 'SEMICOLON))
+                     (expression)
+                     #f)))
+      (consume 'SEMICOLON "Expect ';' after return value.")
+      (list 'RETURN keyword value)))
   (define (statement)
     (cond
      ((match '(FOR)) (for-statement))
      ((match '(IF)) (if-statement))
      ((match '(PRINT)) (print-statement))
+     ((match '(RETURN)) (return-statement))
      ((match '(LEFT-BRACE)) (list 'BLOCK (block '())))
      ((match '(WHILE)) (while-statement))
      (else  (expression-statement))))
@@ -601,6 +609,7 @@
   (test-case "f();"  '((EXPRESSION (CALL (VARIABLE (IDENTIFIER "f" #f 1)) (RIGHT-PAREN ")" #f 1) ()))))
   (test-case "f()();"  '((EXPRESSION (CALL (CALL (VARIABLE (IDENTIFIER "f" #f 1)) (RIGHT-PAREN ")" #f 1) ()) (RIGHT-PAREN ")" #f 1) ()))))
   (test-case "fun f(x, y) { x + y; }" '((FUNCTION (IDENTIFIER "f" #f 1) ((IDENTIFIER "x" #f 1) (IDENTIFIER "y" #f 1)) ((EXPRESSION (BINARY (VARIABLE (IDENTIFIER "x" #f 1)) (PLUS "+" #f 1) (VARIABLE (IDENTIFIER "y" #f 1))))))))
+  (test-case "return 5;" '((RETURN (RETURN "return" #f 1) (LITERAL 5))))
   )
 
 
