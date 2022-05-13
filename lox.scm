@@ -364,9 +364,9 @@
       (consume 'SEMICOLON "Expect ';' after variable declaration.")
       (list 'VAR name initializer)))
   (define (declaration)
-    (if (match '(VAR))
-        (var-declaration)
-        (statement)))
+    (cond
+     ((match '(VAR)) (var-declaration))
+     (else (statement))))
   (define (program rev-statements)
     (if (null? tokens)
         (reverse rev-statements)
